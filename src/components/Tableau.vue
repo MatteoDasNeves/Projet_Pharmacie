@@ -1,3 +1,8 @@
+<script setup>
+defineProps(['liste']);
+defineEmits(['modifier-qte', 'editer', 'supprimer']);
+</script>
+
 <template>
   <table border="1" width="100%">
     <thead>
@@ -23,10 +28,3 @@
     </tbody>
   </table>
 </template>
-
-<script>
-export default {
-  props: ['liste'],
-  emits: ['modifier-qte', 'editer', 'supprimer']
-}
-</script>

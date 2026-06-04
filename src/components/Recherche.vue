@@ -1,3 +1,8 @@
+<script setup>
+defineProps(['modelValue']);
+defineEmits(['update:modelValue']);
+</script>
+
 <template>
   <div>
     <input 
@@ -8,10 +13,3 @@
     <hr>
   </div>
 </template>
-
-<script>
-export default {
-  props: ['modelValue'],
-  emits: ['update:modelValue']
-}
-</script>

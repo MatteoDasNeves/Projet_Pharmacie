@@ -1,3 +1,8 @@
+<script setup>
+defineProps(['form']);
+defineEmits(['sauvegarder', 'annuler']);
+</script>
+
 <template>
   <div>
     <h3>{{ form.id ? 'Modifier' : 'Ajouter' }} un médicament</h3>
@@ -12,10 +17,3 @@
     <br><br>
   </div>
 </template>
-
-<script>
-export default {
-  props: ['form'],
-  emits: ['sauvegarder', 'annuler']
-}
-</script>
