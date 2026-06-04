@@ -1,84 +1,64 @@
 <script setup>
 import { reactive, onMounted, computed } from 'vue';
-import { Medicament } from './Medicament';
+import { MedicamentService } from './services/MedicamentService';
+
 import Recherche from './components/Recherche.vue';
 import Ajout from './components/Ajout.vue';
 import Tableau from './components/Tableau.vue';
 
-const API_URL = "https://apipharmacie.pecatte.fr/api/2/medicaments";
-
+// État de l'application (Centralisé dans un objet reactive pour plus de clarté)
 const state = reactive({
   recherche: '',
-  form: { id: '', denomination: '', formepharmaceutique: '', qte: 0 },
+  form: resetForm(),
   liste: []
 });
 
-// Charger les médicaments au démarrage
-onMounted(() => {
-  getMedicaments();
-});
+// --- Initialisation ---
+onMounted(loadMedicaments);
 
-function getMedicaments() {
-  fetch(API_URL)
-    .then(response => response.json())
-    .then(dataJSON => {
-      state.liste = dataJSON.map(m => new Medicament(m));
-    })
-    .catch(error => console.error("Erreur récupération :", error));
+// --- Actions (Logique métier déléguée au Service) ---
+
+async function loadMedicaments() {
+  try {
+    state.liste = await MedicamentService.getAll();
+  } catch (error) {
+    alert("Impossible de charger les médicaments.");
+  }
 }
 
-function sauvegarder() {
+async function sauvegarder() {
   if (!state.form.denomination) return;
 
-  const method = state.form.id ? 'PUT' : 'POST';
+  try {
+    await MedicamentService.save(state.form);
+    await loadMedicaments();
+    annuler();
+  } catch (error) {
+    alert("Erreur lors de la sauvegarde.");
+  }
+}
+
+async function supprimer(id) {
+  if (!confirm("Voulez-vous vraiment supprimer ce médicament ?")) return;
   
-  fetch(API_URL, {
-    method: method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(state.form)
-  })
-    .then(response => {
-      if (!response.ok) throw new Error('Erreur sauvegarde');
-      getMedicaments();
-      annuler();
-    })
-    .catch(error => console.error("Erreur sauvegarde :", error));
+  try {
+    await MedicamentService.delete(id);
+    await loadMedicaments();
+  } catch (error) {
+    alert("Erreur lors de la suppression.");
+  }
 }
 
-function supprimer(id) {
-  if (!confirm("Supprimer ce médicament ?")) return;
-  
-  fetch(`${API_URL}/${id}`, { method: 'DELETE' })
-    .then(response => {
-      if (!response.ok) throw new Error('Erreur suppression');
-      getMedicaments();
-    })
-    .catch(error => console.error("Erreur suppression :", error));
+async function modifierQte(m, v) {
+  try {
+    await MedicamentService.updateQuantity(m, v);
+    await loadMedicaments();
+  } catch (error) {
+    alert("Erreur lors de la mise à jour de la quantité.");
+  }
 }
 
-function modifierQte(m, v) {
-  const nouvelleQte = parseInt(m.qte) + v;
-  if (nouvelleQte < 0) return;
-
-  // On crée un objet simple pour l'API à partir de l'entité
-  const medModifie = {
-    id: m.id,
-    denomination: m.denomination,
-    formepharmaceutique: m.formepharmaceutique,
-    qte: nouvelleQte
-  };
-
-  fetch(API_URL, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(medModifie)
-  })
-    .then(response => {
-      if (!response.ok) throw new Error('Erreur quantité');
-      getMedicaments();
-    })
-    .catch(error => console.error("Erreur Qte :", error));
-}
+// --- Gestion du Formulaire ---
 
 function editer(m) {
   state.form = { 
@@ -90,33 +70,42 @@ function editer(m) {
 }
 
 function annuler() {
-  state.form = { id: '', denomination: '', formepharmaceutique: '', qte: 0 };
+  state.form = resetForm();
 }
 
-// Propriétés calculées
+function resetForm() {
+  return { id: '', denomination: '', formepharmaceutique: '', qte: 0 };
+}
+
+// --- Propriétés calculées (Logique d'affichage) ---
+
 const listeFiltrée = computed(() => {
+  const query = state.recherche.toLowerCase();
   return state.liste.filter(m => 
-    m.denomination && m.denomination.toLowerCase().includes(state.recherche.toLowerCase())
+    m.denomination?.toLowerCase().includes(query)
   );
 });
 
 const stockTotal = computed(() => {
-  return state.liste.reduce((acc, m) => acc + parseInt(m.qte || 0), 0);
+  return state.liste.reduce((total, m) => total + (parseInt(m.qte) || 0), 0);
 });
 </script>
 
 <template>
-  <div>
+  <div class="container">
     <h1>Ma Pharmacie</h1>
 
+    <!-- Composant de recherche -->
     <Recherche v-model="state.recherche" />
 
+    <!-- Composant d'ajout/modification -->
     <Ajout 
       :form="state.form" 
       @sauvegarder="sauvegarder" 
       @annuler="annuler" 
     />
 
+    <!-- Tableau des médicaments -->
     <Tableau 
       :liste="listeFiltrée" 
       @modifier-qte="modifierQte" 
@@ -124,6 +113,23 @@ const stockTotal = computed(() => {
       @supprimer="supprimer" 
     />
 
-    <p><strong>Nombre total d'articles en stock : {{ stockTotal }}</strong></p>
+    <!-- Statistiques simples -->
+    <p class="stats">
+      <strong>Nombre total d'articles en stock : {{ stockTotal }}</strong>
+    </p>
   </div>
 </template>
+
+<style scoped>
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: sans-serif;
+}
+.stats {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+</style>
