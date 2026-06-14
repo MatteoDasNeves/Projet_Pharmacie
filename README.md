@@ -32,9 +32,6 @@ Une application simple en Vue.js pour gérer un stock de médicaments.
 - `src/services/` : Logique de communication avec l'API.
 - `src/Medicament.js` : Modèle de données pour un médicament.
 
-## Critères d'Utilisabilité Appliqués
+## Le site
 
-- **Clarté** : Utilisation de labels explicites et de messages de confirmation.
-- **Simplicité** : Interface épurée et navigation intuitive.
-- **Feedback** : Alertes en cas d'erreur ou de succès d'une action.
-- **Contrôle** : Possibilité d'annuler une modification ou une suppression.
+- **Lien du site** : https://projet-pharmacie-7521.vercel.app/
