@@ -35,3 +35,8 @@ Une application simple en Vue.js pour gérer un stock de médicaments.
 ## Le site
 
 - **Lien du site** : https://projet-pharmacie-7521.vercel.app/
+
+## Graphes 
+
+![img.png](img.png)
+![img_1.png](img_1.png)
