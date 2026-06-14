@@ -4,6 +4,7 @@ export class Medicament {
     this._denomination = medJSON.denomination;
     this._formepharmaceutique = medJSON.formepharmaceutique;
     this._qte = medJSON.qte || 0;
+    this._photo = medJSON.photo;
   }
 
   get id() {
@@ -20,6 +21,10 @@ export class Medicament {
 
   get qte() {
     return this._qte;
+  }
+
+  get photo() {
+    return this._photo;
   }
 
   set qte(value) {

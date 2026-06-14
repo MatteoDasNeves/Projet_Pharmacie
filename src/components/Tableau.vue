@@ -7,6 +7,7 @@ defineEmits(['modifier-qte', 'editer', 'supprimer']);
   <table border="1" width="100%">
     <thead>
       <tr>
+        <th>Image</th>
         <th>Nom</th>
         <th>Forme</th>
         <th>Quantité</th>
@@ -15,6 +16,15 @@ defineEmits(['modifier-qte', 'editer', 'supprimer']);
     </thead>
     <tbody>
       <tr v-for="m in liste" :key="m.id">
+        <td>
+          <img 
+            v-if="m.photo" 
+            :src="'https://apipharmacie.pecatte.fr/images/' + m.photo" 
+            :alt="m.denomination"
+            class="med-image"
+          >
+          <span v-else>Pas d'image</span>
+        </td>
         <td>{{ m.denomination }}</td>
         <td>{{ m.formepharmaceutique }}</td>
         <td>{{ m.qte }}</td>
@@ -28,3 +38,31 @@ defineEmits(['modifier-qte', 'editer', 'supprimer']);
     </tbody>
   </table>
 </template>
+
+<style scoped>
+.med-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+table {
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+button {
+  margin-right: 5px;
+  cursor: pointer;
+}
+</style>
